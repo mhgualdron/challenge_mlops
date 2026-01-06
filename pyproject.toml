@@ -1,27 +1,30 @@
-[project]
-name = "challenge-mlops"
-version = "0.1.0"
-description = ""
-authors = [
-    {name = "mhgualdron",email = "mhernandezgualdron@gmail.com"}
-]
-license = {text = "MIT"}
-readme = "README.md"
-requires-python = ">=3.11,<3.12"
-dependencies = [
-    "pandas (>=2.3.3,<3.0.0)",
-    "scikit-learn (>=1.8.0,<2.0.0)",
-    "mlflow (>=3.8.1,<4.0.0)",
-    "fastapi (>=0.128.0,<0.129.0)",
-    "uvicorn (>=0.40.0,<0.41.0)",
-    "pydantic (>=2.12.5,<3.0.0)",
-    "requests (>=2.32.5,<3.0.0)",
-    "joblib (>=1.5.3,<2.0.0)",
-    "xgboost (>=3.1.2,<4.0.0)",
-    "kagglehub[pandas-dataframe] (>=0.3.13,<0.4.0)"
-]
-
-
 [build-system]
-requires = ["poetry-core>=2.0.0,<3.0.0"]
+requires = ["poetry-core>=1.8.0"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.poetry]
+name = "mlops-challenge"
+version = "0.1.0"
+description = "MLOps Challenge: Boston Housing Price Predictor"
+authors = ["mhgualdron <mhernandezgualdron@gmail.com>"]
+license = "MIT"
+readme = "README.md"
+package-mode = false
+
+[tool.poetry.dependencies]
+python = "^3.11"
+pandas = "^2.3.3"
+scikit-learn = "^1.8.0"
+mlflow = "^3.8.1"
+fastapi = "^0.128.0"
+uvicorn = { extras = ["standard"], version = "^0.40.0" }
+pydantic = "^2.12.5"
+requests = "^2.32.5"
+joblib = "^1.5.3"
+kagglehub = { extras = ["pandas-dataframe"], version = "^0.3.13" }
+xgboost = "^3.1.2"
+
+[tool.poetry.group.dev.dependencies]
+pytest = "^8.0.0"
+black = "^24.0.0"
+ruff = "^0.2.0"
