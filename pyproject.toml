@@ -23,6 +23,7 @@ requests = "^2.32.5"
 joblib = "^1.5.3"
 kagglehub = { extras = ["pandas-dataframe"], version = "^0.3.13" }
 xgboost = "^3.1.2"
+httpx = "^0.28.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.0.0"
