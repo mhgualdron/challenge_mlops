@@ -6,6 +6,7 @@ import pandas as pd
 import uvicorn
 import os
 
+
 # Pydantic model to define the input data
 class HousingFeatures(BaseModel):
     CRIM: float
@@ -38,54 +39,64 @@ class HousingFeatures(BaseModel):
                 "TAX": 296,
                 "PTRATIO": 15.3,
                 "B": 396.9,
-                "LSTAT": 4.98
+                "LSTAT": 4.98,
             }
         }
     }
+
 
 # Initialize FastAPI app
 app = FastAPI(title="Boston Housing Price Predictor", version="1.0")
 
 model = None
 
+
 # Startup event to load the model
 @app.on_event("startup")
 def load_model():
     global model
     model_path = "models/model_pipeline.pkl"
-    
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"Model not found at {model_path}")
-    
-    model = joblib.load(model_path)
-    print("Model loaded successfully into memory")
+
+    if os.path.exists(model_path):
+        model = joblib.load(model_path)
+        print("Model loaded successfully.")
+    else:
+        if os.getenv("ENV") != "test":
+            print(
+                "WARNING: Model file not found at 'models/model_pipeline.pkl'. Model will not be loaded."
+            )
+
 
 # Predict endpoint
 @app.post("/predict", tags=["Inference"])
 def predict_price(features: HousingFeatures):
     if model is None:
         raise HTTPException(status_code=500, detail="Model not loaded.")
-    
+
     try:
         # Convert input data to DataFrame
-        input_df = pd.DataFrame([features.dict()])
-        
+        input_df = pd.DataFrame([features.model_dump()])
+
         # Try to make prediction
         prediction = model.predict(input_df)
-        
+
         # Convert numpy.floatXX to native Python float for correct serialization
         predicted_price = float(prediction[0])
-        
+
         # Return result rounded to 2 decimal places
         return {"predicted_price": round(predicted_price, 2)}
-    
+
     except Exception as e:
-        raise HTTPException(status_code=400, detail=f"Error processing request: {str(e)}")
-    
+        raise HTTPException(
+            status_code=400, detail=f"Error processing request: {str(e)}"
+        )
+
+
 # Health check endpoint
 @app.get("/health", tags=["State"])
 def health_check():
     return {"status": "ok", "model_loaded": model is not None}
+
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)

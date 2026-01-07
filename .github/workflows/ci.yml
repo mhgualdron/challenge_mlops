@@ -1,0 +1,43 @@
+# .github/workflows/ci.yml
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test-and-build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Poetry
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          poetry install --only main,dev
+
+      - name: Run linting
+        run: |
+          poetry run ruff check src/
+          poetry run black --check src/
+
+      - name: Run tests
+        run: |
+          poetry run pytest tests/ -v
+
+      - name: Build Docker image
+        run: |
+          docker compose build --no-cache
