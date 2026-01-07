@@ -30,10 +30,10 @@ docker-build:
 	docker build -t boston-housing-api:latest .
 
 docker-up:
-	docker-compose up -d
+	docker compose up -d
 
 docker-down:
-	docker-compose down
+	docker compose down
 
 mlflow:
 	poetry run mlflow ui --backend-store-uri sqlite:///mlflow.db
