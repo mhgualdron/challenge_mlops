@@ -24,7 +24,7 @@ RUN poetry install --no-interaction --no-ansi --only main
 
 # Copy application code
 COPY src/ ./src/
-COPY models/ ./models/
+# COPY models/ ./models/
 
 # Expose port
 EXPOSE 8000
