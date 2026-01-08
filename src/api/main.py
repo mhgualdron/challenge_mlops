@@ -1,13 +1,35 @@
 # src/api/main.py
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 import joblib
 import pandas as pd
 import uvicorn
 import os
 
+ml_models = {}
 
-# Pydantic model to define the input data
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    model_path = "models/model_pipeline.pkl"
+    if os.path.exists(model_path):
+        ml_models["model"] = joblib.load(model_path)
+        print(f"Model loaded from: {model_path}")
+    else:
+        print(f"Model not found in {model_path}")
+        ml_models["model"] = None
+    
+    yield 
+    
+    ml_models.clear()
+    print("Models cleared from memory.")
+
+app = FastAPI(
+    title="Boston Housing Price Predictor", 
+    version="1.0",
+    lifespan=lifespan 
+)
+
 class HousingFeatures(BaseModel):
     CRIM: float
     ZN: float
@@ -23,80 +45,34 @@ class HousingFeatures(BaseModel):
     B: float
     LSTAT: float
 
-    # Example for documentation
-    model_config = {
-        "json_schema_extra": {
+    class Config:
+        json_schema_extra = {
             "example": {
-                "CRIM": 0.00632,
-                "ZN": 18.0,
-                "INDUS": 2.31,
-                "CHAS": 0.0,
-                "NOX": 0.538,
-                "RM": 6.575,
-                "AGE": 65.2,
-                "DIS": 4.09,
-                "RAD": 1,
-                "TAX": 296,
-                "PTRATIO": 15.3,
-                "B": 396.9,
-                "LSTAT": 4.98,
+                "CRIM": 0.00632, "ZN": 18.0, "INDUS": 2.31, "CHAS": 0.0,
+                "NOX": 0.538, "RM": 6.575, "AGE": 65.2, "DIS": 4.09,
+                "RAD": 1, "TAX": 296, "PTRATIO": 15.3, "B": 396.9, "LSTAT": 4.98
             }
         }
-    }
 
-
-# Initialize FastAPI app
-app = FastAPI(title="Boston Housing Price Predictor", version="1.0")
-
-model = None
-
-
-# Startup event to load the model
-@app.on_event("startup")
-def load_model():
-    global model
-    model_path = "models/model_pipeline.pkl"
-
-    if os.path.exists(model_path):
-        model = joblib.load(model_path)
-        print("Model loaded successfully.")
-    else:
-        if os.getenv("ENV") != "test":
-            print(
-                "WARNING: Model file not found at 'models/model_pipeline.pkl'. Model will not be loaded."
-            )
-
-
-# Predict endpoint
-@app.post("/predict", tags=["Inference"])
+@app.post("/predict", tags=["Inferencia"])
 def predict_price(features: HousingFeatures):
-    if model is None:
-        raise HTTPException(status_code=500, detail="Model not loaded.")
-
+    if ml_models.get("model") is None:
+        raise HTTPException(status_code=500, detail="Model is not loaded.")
+    
     try:
-        # Convert input data to DataFrame
+
         input_df = pd.DataFrame([features.model_dump()])
-
-        # Try to make prediction
-        prediction = model.predict(input_df)
-
-        # Convert numpy.floatXX to native Python float for correct serialization
-        predicted_price = float(prediction[0])
-
-        # Return result rounded to 2 decimal places
-        return {"predicted_price": round(predicted_price, 2)}
-
+        prediction = ml_models["model"].predict(input_df)
+        return {"predicted_price": round(prediction[0], 2)}
     except Exception as e:
-        raise HTTPException(
-            status_code=400, detail=f"Error processing request: {str(e)}"
-        )
+        raise HTTPException(status_code=400, detail=str(e))
 
-
-# Health check endpoint
-@app.get("/health", tags=["State"])
+@app.get("/health", tags=["Estado"])
 def health_check():
-    return {"status": "ok", "model_loaded": model is not None}
-
+    return {
+        "status": "ok", 
+        "model_loaded": ml_models.get("model") is not None
+    }
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
