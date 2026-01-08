@@ -6,8 +6,7 @@
 ![FastAPI](https://img.shields.io/badge/FastAPI-Serving-green)
 ![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen)
 
-An **industrial-grade, end-to-end MLOps pipeline** designed to predict housing prices using the Boston Housing dataset.  
-This project demonstrates a **Cloud Agnostic** and **Self-Hosted** architecture, prioritizing **reproducibility**, **modularity**, and **production readiness**, without reliance on managed ML services (e.g., SageMaker, Azure ML).
+A **delivery-ready, end-to-end MLOps pipeline** designed to predict housing prices using the Boston Housing dataset. This project implements a Cloud Agnostic and Self-Hosted architecture, prioritizing reproducibility, modular software design, and automated CI/CD workflows, strictly avoiding vendor lock-in from managed services.
 
 ---
 
@@ -24,6 +23,8 @@ This project demonstrates a **Cloud Agnostic** and **Self-Hosted** architecture,
 - [Testing & Quality Assurance](#-testing--quality-assurance)
 - [Project Structure](#-project-structure)
 - [AI Tools Disclosure](#-ai-tools-disclosure)
+- [Future Improvements & Scalability](#-future-improvements--scalability)
+
 
 ---
 
@@ -242,12 +243,33 @@ mlops-challenge/
 
 This project leveraged Generative AI to accelerate development:
 
-Boilerplate Generation: Pydantic schemas and initial test scaffolding
-
-Code Quality Assistance: Refactoring suggestions and style improvements
-
-All AI-generated content was manually reviewed, refactored, and validated to ensure correctness, security, and production readiness.
 - **Boilerplate Generation**: Pydantic schemas and initial test scaffolding.
 - **Code Quality Assistance**: Refactoring suggestions and style improvements.
 
 **All code has been manually reviewed, tested, and validated by me**
+
+
+## Future Improvements & Scalability
+While this project serves as a robust functional baseline, the following enhancements are recommended for a *production-grade environment*:
+
+
+1. **Data Version Control (DVC)**: Integrate DVC to track dataset versions alongside code, ensuring 100% reproducibility of experiments when data changes over time.
+
+
+2. **Centralized Model Registry**: Transition from a local MLflow instance to a remote server (e.g., hosted on an EC2/GCE instance) to allow team collaboration and formal "Champion vs. Challenger" model management.
+
+
+3. **Advanced Monitoring & Observability**: Implement a sidecar container with Prometheus and Grafana to track real-time inference latency, throughput, and data drift detection (using libraries like EvidentlyAI).
+
+
+4. **Infrastructure as Code (IaC)**: Use Terraform or Ansible to automate the provisioning of the virtual machines where the Docker containers are deployed, maintaining the cloud-agnostic principle.
+
+
+5. **API Security & Rate Limiting**: Add an OAuth2/API Key authentication layer and implement rate limiting to protect the inference endpoint from abuse in a public environment.
+
+
+6. **Automated Retraining Trigger**: Configure a CI/CD trigger or a CronJob that initiates the train.py script automatically when performance metrics fall below a specific threshold.
+
+# -----------
+
+7. **Ecosystem Integration (Fury)**: In a real Mercado Libre environment, the next step would be migrating this agnostic containerized solution to Fury. This would allow taking advantage of Meli's internal metrics, standardized CI/CD pipelines, and high-availability infrastructure (AWS / GCP).
