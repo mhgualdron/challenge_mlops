@@ -211,7 +211,7 @@ Run the test suite:
 ```bash
 make test
 # or
-poetry run pytest tests/ -v
+poetry run pytest
 ```
 
 ---

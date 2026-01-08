@@ -24,7 +24,7 @@ serve:
 	poetry run uvicorn src.api.main:app --reload --host 0.0.0.0 --port 8000
 
 test:
-	poetry run pytest tests/ -v --cov=src
+	poetry run pytest
 
 docker-build:
 	docker build -t boston-housing-api:latest .
