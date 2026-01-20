@@ -2,6 +2,7 @@
 from fastapi.testclient import TestClient
 from unittest.mock import MagicMock, patch
 from src.api.main import app, ml_models
+import numpy as np
 
 client = TestClient(app)
 
@@ -14,7 +15,9 @@ def test_predict_endpoint_mocked_success():
     2. Inject this fake model into the API's global model storage
     """
     fake_model = MagicMock()
-    fake_model.predict.return_value = [25.0]  # Mock response
+    fake_model.predict.return_value = np.array(
+        [25.0], dtype=np.float32
+    )  # Mock response
 
     # Injection of fake model
     # patch.dict replaces the 'ml_models' dict temporarily

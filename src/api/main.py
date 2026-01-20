@@ -72,7 +72,7 @@ def predict_price(features: HousingFeatures):
     try:
         input_df = pd.DataFrame([features.model_dump()])
         prediction = ml_models["model"].predict(input_df)
-        return {"predicted_price": round(prediction[0], 2)}
+        return {"predicted_price": round(prediction[0].item(), 2)}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
